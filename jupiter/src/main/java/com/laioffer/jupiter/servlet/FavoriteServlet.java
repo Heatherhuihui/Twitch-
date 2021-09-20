@@ -43,11 +43,13 @@ public class FavoriteServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //check if the session is still valid, which means the user has been logged in succesffully
         HttpSession session = request.getSession(false);
         if (session == null) {
-
+            respones.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
         }
-
+        String userId = (String) session.getAttrbute("user_id");
         // Get favorite item information from request body
         // deserialize JSON string into Java objects, we can use ObjectMapper to deserialize JSON content into a java object.
         // use writeValue API to serialize java object as JSON output
@@ -72,7 +74,13 @@ public class FavoriteServlet extends HttpServlet {
     }
 
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String userId = request.getParameter("user_id");
+
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+        String userId = (String) session.getAttribute("user_id");
         ObjectMapper mapper = new ObjectMapper();
         FavoriteRequestBody body = mapper.readValue(request.getReader(), FavoriteRequestBody.class);
         if (body == null) {
